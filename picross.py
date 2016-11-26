@@ -20,7 +20,7 @@ class Solver:
                     [int(i) for i in file.readline().split()])
         self.chart = []
         for n in range(self.n_rows):
-            self.chart.append(UNKNOWN * self.n_cols)
+            self.chart.append([UNKNOWN] * self.n_cols)
         self.row_patterns = []
         for row in self.row_values:
             self.row_patterns.append(
@@ -34,20 +34,20 @@ class Solver:
         if sum(values) + len(values) - 1 > size:
             return []
         if len(values) == 0 or values[0] == 0:
-            return [EMPTY * size]
+            return [[EMPTY] * size]
         if len(values) == 1 and values[0] == size:
-            return [FILLED * size]
+            return [[FILLED] * size]
         answers = self.get_possible_arrangements(
             values[1:], size - values[0] - 1)
-        answers = [FILLED * values[0] + EMPTY + suffix for suffix in answers]
-        return answers + [EMPTY + suffix for suffix in self.get_possible_arrangements(values, size - 1)]
+        answers = [[FILLED] * values[0] + [EMPTY] + suffix for suffix in answers]
+        return answers + [[EMPTY] + suffix for suffix in self.get_possible_arrangements(values, size - 1)]
 
     def evaluate_row(self, row):
         patterns = self.row_patterns[row]
-        placed = list(self.chart[row])
+        placed = self.chart[row]
         patterns, placed = self.evaluate(patterns, placed)
         self.row_patterns[row] = patterns
-        self.chart[row] = ''.join(placed)
+        self.chart[row] = placed
 
     def evaluate_col(self, col):
         patterns = self.col_patterns[col]
@@ -78,11 +78,9 @@ class Solver:
     def extract_column(self, col):
         return [row[col] for row in self.chart]
 
-    def return_column(self, col, values):
-        for i in range(len(values)):
-            row = list(self.chart[i])
-            row[col] = values[i]
-            self.chart[i] = ''.join(row)
+    def return_column(self, col, newColumn):
+        for i in range(self.n_rows):
+            self.chart[i][col] = newColumn[i]
 
     def solve(self):
         oldChart = None
