@@ -1,10 +1,15 @@
+EMPTY = ' '
+UNKNOWN = '.'
+FILLED = '#'
+
 class Solver:
     def __init__(self, filepath):
         """Load the picross data from a file"""
         self.col_values = []
         self.row_values = []
         with open(filepath) as file:
-            self.n_cols, self.n_rows = [int(i) for i in file.readline().split()]
+            self.n_cols, self.n_rows = (
+                [int(i) for i in file.readline().split()])
             file.readline()
             for i in range(self.n_cols):
                 self.col_values.append(
@@ -15,7 +20,7 @@ class Solver:
                     [int(i) for i in file.readline().split()])
         self.chart = []
         for n in range(self.n_rows):
-            self.chart.append(' ' * self.n_cols)
+            self.chart.append(UNKNOWN * self.n_cols)
         self.row_patterns = []
         for row in self.row_values:
             self.row_patterns.append(
@@ -29,12 +34,13 @@ class Solver:
         if sum(values) + len(values) - 1 > size:
             return []
         if len(values) == 0 or values[0] == 0:
-            return ['.' * size]
+            return [EMPTY * size]
         if len(values) == 1 and values[0] == size:
-            return ['O' * size]
-        answers = self.get_possible_arrangements(values[1:], size - values[0] - 1)
-        answers = ['O' * values[0] + '.' + suffix for suffix in answers]
-        return answers + ['.' + suffix for suffix in self.get_possible_arrangements(values, size - 1)]
+            return [FILLED * size]
+        answers = self.get_possible_arrangements(
+            values[1:], size - values[0] - 1)
+        answers = [FILLED * values[0] + EMPTY + suffix for suffix in answers]
+        return answers + [EMPTY + suffix for suffix in self.get_possible_arrangements(values, size - 1)]
 
     def evaluate_row(self, row):
         patterns = self.row_patterns[row]
@@ -51,16 +57,18 @@ class Solver:
         self.return_column(col, placed)
 
     def evaluate(self, patterns, placed):
-        # first, eliminate patterns that can't fit into the chart
+        # eliminate patterns that contradict cells that
+        # are already on the board.
         for pi, pattern in enumerate(patterns):
             for ci, char in enumerate(placed):
-                if char != ' ' and pattern[ci] != char:
+                if char != UNKNOWN and pattern[ci] != char:
                     patterns[pi] = None
                     break
         patterns = [p for p in patterns if p is not None]
-        # for the remaining patterns, find cells that have the same answer
+
+        # find cells that are the same between all possible patterns.
         for c in range(len(placed)):
-            if placed[c] != ' ':
+            if placed[c] != UNKNOWN:
                 continue
             possible_cells = set([p[c] for p in patterns])
             if len(possible_cells) == 1:
