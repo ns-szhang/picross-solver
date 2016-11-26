@@ -23,10 +23,9 @@ class Solver:
         self.col_patterns = []
         for col in self.col_values:
             self.col_patterns.append(
-                self.get_possible_arrangements(col, self.n_cols))
+                self.get_possible_arrangements(col, self.n_rows))
 
     def get_possible_arrangements(self, values, size):
-        #print('get_possible_arrangements', values, size)
         if sum(values) + len(values) - 1 > size:
             return []
         if len(values) == 0 or values[0] == 0:
@@ -97,8 +96,12 @@ class Solver:
             and all(len(patterns) > 0 for patterns in self.row_patterns))
 
     def __str__(self):
-        return '\n'.join([''.join(row) for row in self.chart])
+        return '\n'.join([' '.join(row) for row in self.chart])
 
-solver = Solver('butterfly.txt')
-solver.solve()
-print(str(solver))
+if __name__ == '__main__':
+    solver = Solver('butterfly.txt')
+    solver.solve()
+    if solver.is_solvable():
+        print(str(solver))
+    else:
+        print('Puzzle is not solvable')
